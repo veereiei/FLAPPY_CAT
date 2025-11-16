@@ -237,7 +237,6 @@ let game_over = false;
 let lastPipeTime = 0;
 let lastFrameTime = 0;
 let pipeSpeed = INITIAL_PIPE_SPEED; 
-let touchOccurred = false;
 
 function resetGame() {
     bird = new Bird(WIDTH * 0.2, HEIGHT / 2);
@@ -334,23 +333,21 @@ function handleInput(e) {
     // 1. จัดการ Touch: ป้องกัน Default action และตั้งค่าสถานะ
     if (isTouchStart) {
         e.preventDefault(); 
-        touchOccurred = true; // ตั้งค่าสถานะว่ามีการแตะเกิดขึ้น
     }
 
     // 2. ป้องกัน Mousedown ซ้ำซ้อน: ถ้ามีการแตะ (touchOccurred) เกิดขึ้น 
     // และตอนนี้เป็น Mousedown (ซึ่งน่าจะเป็นอีเวนต์ที่ตามมา) ให้ข้ามมันไป
-    if (isMouseDown && touchOccurred) {
-        // รีเซ็ตสถานะ touchOccurred เพื่อรับ input ครั้งถัดไป
-        touchOccurred = false; 
-        return; // ข้าม Logic การกระโดดทั้งหมด
+    if (isTouchStart) {
+        document.removeEventListener('mousedown', handleInput);
     }
     
     // 3. กำหนดตัวกระตุ้นการกระโดด
     const isFlapEvent = isKeyDown || isMouseDown || isTouchStart;
 
-    if (isFlapEvent && (isKeyDown || isMouseDown || isTouchStart)) {
-        if (isKeyDown) e.preventDefault(); 
-
+    if (isKeyDown || isMouseDown || isTouchStart) { 
+        
+        if (isKeyDown) e.preventDefault(); // ป้องกัน Space Bar เลื่อนหน้าจอ
+        
         if (waitingForStart) {
             waitingForStart = false; 
         } else if (game_over) {
