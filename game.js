@@ -1,7 +1,7 @@
 // --- การตั้งค่าเกม ---
 const FPS = 60;
-const WIDTH = 400;
-const HEIGHT = 600;
+const WIDTH = 500;
+const HEIGHT = 800;
 const GRAVITY = 0.45;
 const FLAP_STRENGTH = -9;
 const PIPE_GAP = HEIGHT / 4;
@@ -360,8 +360,33 @@ function handleInput(e) {
     }
 }
 
+function mainMenuLoop(timestamp) {
+    if (isMenu) {
+        // วาดภาพหน้าปก/พื้นหลัง
+        if (images.COVER) {
+            ctx.drawImage(images.COVER, 0, 0, WIDTH, HEIGHT);
+            drawText("Press SPACE or Click to start", WIDTH / 2, HEIGHT / 2 + 170, 28, 'white', WIDTH - 20);
+        } else {
+            // สำรอง: หากภาพ COVER โหลดไม่สำเร็จ
+            ctx.fillStyle = 'black'; 
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            drawText("LOADING...", WIDTH / 2, HEIGHT / 2, 48, 'white', WIDTH - 20);
+        }
+    }
+
+    if (waitingForStart) {
+        window.requestAnimationFrame(mainMenuLoop);
+    } else {
+        isMenu = false;
+        resetGame();
+        window.requestAnimationFrame(gameLoop);
+    }
+}
+
+
 document.addEventListener('keydown', handleInput);
 document.addEventListener('mousedown', handleInput);
+document.addEventListener('touchstart', handleInput); // <--- อย่าลืมเพิ่ม touchstart ด้วยนะครับ
 
 // --- เริ่มต้น ---
 loadAllImages(() => {
