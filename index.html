@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Cat: Space Edition (JS)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Cat</title>
     <style>
         body {
             display: flex;
@@ -16,6 +16,12 @@
         canvas {
             border: 2px solid white;
             display: block;
+            max-width: 100vw;
+            max-height: 100vh;
+            width: auto;
+            height: 100vh; /* ตั้งความสูง 100% ของ Viewport */
+            aspect-ratio: 4 / 6; /* รักษาสัดส่วน 400:600 */
+            margin: auto;
         }
     </style>
 </head>
