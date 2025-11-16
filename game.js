@@ -237,6 +237,7 @@ let game_over = false;
 let lastPipeTime = 0;
 let lastFrameTime = 0;
 let pipeSpeed = INITIAL_PIPE_SPEED; 
+let touchOccurred = false;
 
 function resetGame() {
     bird = new Bird(WIDTH * 0.2, HEIGHT / 2);
@@ -320,40 +321,36 @@ function gameLoop(timestamp) {
     window.requestAnimationFrame(gameLoop);
 }
 
+
 // --- Main Menu ---
 let waitingForStart = true;
 let isMenu = true;
 
 function handleInput(e) {
-    // 1. ป้องกันการทำงานซ้ำซ้อน (Prevent Double Event)
-    // หากมีการแตะหน้าจอ (touchstart) เกิดขึ้น ให้ยกเลิกการทำงานของ mousedown/click/mouseup
-    if (e.type === 'touchstart') {
+    const isKeyDown = e.type === 'keydown';
+    const isTouchStart = e.type === 'touchstart';
+    const isMouseDown = e.type === 'mousedown';
+
+    // 1. จัดการ Touch: ป้องกัน Default action และตั้งค่าสถานะ
+    if (isTouchStart) {
         e.preventDefault(); 
-        // เมื่อ touchstart ทำงาน, เราถือว่ามันเสร็จสิ้นแล้ว ไม่ต้องให้ mousedown/mouseup ตามมา
+        touchOccurred = true; // ตั้งค่าสถานะว่ามีการแตะเกิดขึ้น
+    }
+
+    // 2. ป้องกัน Mousedown ซ้ำซ้อน: ถ้ามีการแตะ (touchOccurred) เกิดขึ้น 
+    // และตอนนี้เป็น Mousedown (ซึ่งน่าจะเป็นอีเวนต์ที่ตามมา) ให้ข้ามมันไป
+    if (isMouseDown && touchOccurred) {
+        // รีเซ็ตสถานะ touchOccurred เพื่อรับ input ครั้งถัดไป
+        touchOccurred = false; 
+        return; // ข้าม Logic การกระโดดทั้งหมด
     }
     
-    // 2. กำหนดเงื่อนไข Input
-    const isKeyDown = e.type === 'keydown';
-    // ใช้ mousedown และ touchstart เป็นตัวกระตุ้นการกระโดด
-    const isClickOrTouch = (e.type === 'mousedown' || e.type === 'touchstart');
+    // 3. กำหนดตัวกระตุ้นการกระโดด
+    const isFlapEvent = isKeyDown || isMouseDown || isTouchStart;
 
-    // --- Logic สำหรับการกดปุ่ม (Keyboard) ---
-    if (isKeyDown && (e.key === ' ' || e.key === 'ArrowUp')) {
-        e.preventDefault(); 
-        
-        if (waitingForStart) {
-            waitingForStart = false; 
-        } else if (game_over) {
-            resetGame(); 
-        } else {
-            bird.flap();
-        }
+    if (isFlapEvent && (isKeyDown || isMouseDown || isTouchStart)) {
+        if (isKeyDown) e.preventDefault(); 
 
-    // --- Logic สำหรับการคลิก/แตะ (Mouse/Touch) ---
-    } else if (isClickOrTouch) { 
-        // 🚨 สำคัญ: หากมันถูกเรียกจาก mousedown และไม่ใช่ Touch Screen (สำหรับคอมพิวเตอร์ทั่วไป)
-        // หรือเรียกจาก touchstart (สำหรับมือถือ) ให้ flap.
-        
         if (waitingForStart) {
             waitingForStart = false; 
         } else if (game_over) {
@@ -362,7 +359,7 @@ function handleInput(e) {
             bird.flap();
         }
     }
-
+    
     // สำหรับปุ่ม Escape
     if (isKeyDown && e.key === 'Escape') {
         console.log("Escape pressed.");
