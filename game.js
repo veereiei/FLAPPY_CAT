@@ -324,46 +324,36 @@ function gameLoop(timestamp) {
 let waitingForStart = true;
 let isMenu = true;
 
-function mainMenuLoop(timestamp) {
-    if (isMenu) {
-        ctx.drawImage(images.COVER, 0, 0, WIDTH, HEIGHT);
-        drawText("Press SPACE or Click to start", WIDTH / 2, HEIGHT / 2 + 170, 28, 'white', WIDTH - 20);
-    }
-
-    if (waitingForStart) {
-        window.requestAnimationFrame(mainMenuLoop);
-    } else {
-        isMenu = false;
-        resetGame();
-        window.requestAnimationFrame(gameLoop);
-    }
-}
-
-// --- การจัดการ Input (แก้ไขการ Restart) ---
 function handleInput(e) {
+    // e.preventDefault() ป้องกันการเลื่อนหน้าจอเมื่อแตะ (สำคัญสำหรับมือถือ)
+    if (e.type === 'touchstart') {
+        e.preventDefault(); 
+    }
+
     const isKeyDown = e.type === 'keydown';
-    const isClick = e.type === 'mousedown';
+    const isClickOrTouch = (e.type === 'mousedown' || e.type === 'touchstart'); // <--- รวม Touch เข้าไปด้วย
 
     if (isKeyDown && (e.key === ' ' || e.key === 'ArrowUp')) {
         e.preventDefault(); 
-        
+
         if (waitingForStart) {
             waitingForStart = false; 
-        } else if (game_over) { // <--- หากแพ้ ให้รีเซ็ตทันที
+        } else if (game_over) {
             resetGame(); 
         } else {
             bird.flap();
         }
 
-    } else if (isClick) {
+    } else if (isClickOrTouch) { // <--- ใช้ isClickOrTouch
         if (waitingForStart) {
             waitingForStart = false; 
-        } else if (game_over) { // <--- หากแพ้ ให้รีเซ็ตทันที
+        } else if (game_over) {
             resetGame(); 
         } else {
             bird.flap();
         }
     }
+
     // สำหรับปุ่ม Escape
     if (isKeyDown && e.key === 'Escape') {
         console.log("Escape pressed.");
