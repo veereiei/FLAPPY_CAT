@@ -325,17 +325,22 @@ let waitingForStart = true;
 let isMenu = true;
 
 function handleInput(e) {
-    // e.preventDefault() ป้องกันการเลื่อนหน้าจอเมื่อแตะ (สำคัญสำหรับมือถือ)
+    // 1. ป้องกันการทำงานซ้ำซ้อน (Prevent Double Event)
+    // หากมีการแตะหน้าจอ (touchstart) เกิดขึ้น ให้ยกเลิกการทำงานของ mousedown/click/mouseup
     if (e.type === 'touchstart') {
         e.preventDefault(); 
+        // เมื่อ touchstart ทำงาน, เราถือว่ามันเสร็จสิ้นแล้ว ไม่ต้องให้ mousedown/mouseup ตามมา
     }
-
+    
+    // 2. กำหนดเงื่อนไข Input
     const isKeyDown = e.type === 'keydown';
-    const isClickOrTouch = (e.type === 'mousedown' || e.type === 'touchstart'); // <--- รวม Touch เข้าไปด้วย
+    // ใช้ mousedown และ touchstart เป็นตัวกระตุ้นการกระโดด
+    const isClickOrTouch = (e.type === 'mousedown' || e.type === 'touchstart');
 
+    // --- Logic สำหรับการกดปุ่ม (Keyboard) ---
     if (isKeyDown && (e.key === ' ' || e.key === 'ArrowUp')) {
         e.preventDefault(); 
-
+        
         if (waitingForStart) {
             waitingForStart = false; 
         } else if (game_over) {
@@ -344,7 +349,11 @@ function handleInput(e) {
             bird.flap();
         }
 
-    } else if (isClickOrTouch) { // <--- ใช้ isClickOrTouch
+    // --- Logic สำหรับการคลิก/แตะ (Mouse/Touch) ---
+    } else if (isClickOrTouch) { 
+        // 🚨 สำคัญ: หากมันถูกเรียกจาก mousedown และไม่ใช่ Touch Screen (สำหรับคอมพิวเตอร์ทั่วไป)
+        // หรือเรียกจาก touchstart (สำหรับมือถือ) ให้ flap.
+        
         if (waitingForStart) {
             waitingForStart = false; 
         } else if (game_over) {
